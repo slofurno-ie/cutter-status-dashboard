@@ -1,0 +1,14 @@
+#!/bin/sh
+
+while :; do
+  sleep 1
+  if nc -z $DB_HOST $DB_PORT > /dev/null 2>&1; then
+    echo "postgres ready"
+    break
+  fi
+  echo "waiting for postgres"
+done
+
+CONN_STRING="postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable"
+
+migrate -source file:///migrations -database $CONN_STRING up
