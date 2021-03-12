@@ -1,15 +1,22 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"time"
 
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
+	"github.com/IdeaEvolver/cutter-pkg/client"
 	"github.com/IdeaEvolver/cutter-pkg/clog"
 	"github.com/IdeaEvolver/cutter-pkg/service"
+	"github.com/IdeaEvolver/cutter-status-dashboard/healthchecks"
 	"github.com/IdeaEvolver/cutter-status-dashboard/server"
 	"github.com/IdeaEvolver/cutter-status-dashboard/status"
 	"github.com/kelseyhightower/envconfig"
+	"go.opencensus.io/plugin/ochttp"
 
 	"contrib.go.opencensus.io/integrations/ocsql"
 )
@@ -62,7 +69,17 @@ func main() {
 
 	clog.Infof("connected to postgres: %s:%s", cfg.DbHost, cfg.DbPort)
 
-	statusStore := status.New(cfg.PlatformHealthcheck, cfg.FulfillmentHealthcheck, cfg.CrmHealthcheck, cfg.StudyHealthcheck, db)
+	statusStore := status.New(db)
+
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	internalClient := &http.Client{
+		Transport: &ochttp.Transport{
+			// Use Google Cloud propagation format.
+			Propagation: &propagation.HTTPFormat{},
+			Base:        customTransport,
+		},
+	}
 
 	scfg := &service.Config{
 		Addr:                fmt.Sprintf(":%s", cfg.PORT),
@@ -70,11 +87,36 @@ func main() {
 		MaxShutdownTime:     time.Second * 30,
 	}
 
+	healthchecksClient := &healthchecks.Client{
+		Client:      client.New(internalClient),
+		Platform:    cfg.PlatformHealthcheck,
+		Fulfillment: cfg.FulfillmentHealthcheck,
+		Crm:         cfg.CrmHealthcheck,
+		Study:       cfg.StudyHealthcheck,
+	}
+
 	handler := &server.Handler{
-		Statuses: statusStore,
+		Healthchecks: healthchecksClient,
+		Statuses:     statusStore,
 	}
 	s := server.New(scfg, handler)
 
 	clog.Infof("listening on %s", s.Addr)
 	fmt.Println(s.ListenAndServe())
+
+	ctx := context.Background()
+
+	for {
+		platformStatus, err := handler.Healthchecks.PlatformStatus(ctx)
+		if err != nil {
+			clog.Fatalf("Error retrieving platform status", err)
+		}
+
+		if err := handler.Statuses.UpdateStatus(ctx, "platform", platformStatus.Status); err != nil {
+			clog.Fatalf("Error updating platform status", err)
+		}
+
+		time.Sleep(60 * time.Second)
+	}
+
 }

@@ -13,6 +13,7 @@ contrib.go.opencensus.io/integrations/ocsql v0.1.7/go.mod h1:8DsSdjz3F+APR+0z0Wk
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/IdeaEvolver/cutter-pkg/client v1.7.0 h1:lO0OWZ/fA4zriWlrutfUiP9POVfWduzW7UA0VQszLzY=
 github.com/IdeaEvolver/cutter-pkg/client v1.7.0/go.mod h1:QgXdHYwA7g8j0v6u7rzMFjUvbkCDFuS7S5TCIQhyCfI=
 github.com/IdeaEvolver/cutter-pkg/clog v1.1.6 h1:J0wiXJ2WInUSIZD1dU7zWSWYjN48EzvVMhgM9IwjNeI=
 github.com/IdeaEvolver/cutter-pkg/clog v1.1.6/go.mod h1:t5AxKveQCQ4CJHZVI8enNO4fcf4jVAx7NonLvyfiWxE=

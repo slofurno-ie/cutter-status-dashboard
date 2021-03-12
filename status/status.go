@@ -9,11 +9,6 @@ import (
 
 type StatusStore struct {
 	db *sql.DB
-
-	PlatformHealthcheck    string
-	FulfillmentHealthcheck string
-	CrmHealthcheck         string
-	StudyHealthcheck       string
 }
 
 type AllStatuses struct {
@@ -25,13 +20,9 @@ type Status struct {
 	Status string `json:"status"`
 }
 
-func New(platform, fulfillment, crm, study string, db *sql.DB) *StatusStore {
+func New(db *sql.DB) *StatusStore {
 	return &StatusStore{
-		PlatformHealthcheck:    platform,
-		FulfillmentHealthcheck: fulfillment,
-		CrmHealthcheck:         crm,
-		StudyHealthcheck:       study,
-		db:                     db,
+		db: db,
 	}
 }
 

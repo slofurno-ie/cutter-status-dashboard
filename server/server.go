@@ -5,6 +5,7 @@ import (
 
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/IdeaEvolver/cutter-pkg/service"
+	"github.com/IdeaEvolver/cutter-status-dashboard/healthchecks"
 	"github.com/IdeaEvolver/cutter-status-dashboard/status"
 	"github.com/go-chi/chi"
 	"go.opencensus.io/plugin/ochttp"
@@ -17,7 +18,8 @@ type StatusStore interface {
 }
 
 type Handler struct {
-	Statuses StatusStore
+	Statuses     StatusStore
+	Healthchecks *healthchecks.Client
 }
 
 func New(cfg *service.Config, handler *Handler) *service.Server {
