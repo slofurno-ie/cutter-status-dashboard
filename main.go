@@ -101,22 +101,9 @@ func main() {
 	}
 	s := server.New(scfg, handler)
 
+	ctx := context.Background()
+	go handler.AllChecks(ctx)
+
 	clog.Infof("listening on %s", s.Addr)
 	fmt.Println(s.ListenAndServe())
-
-	ctx := context.Background()
-
-	for {
-		platformStatus, err := handler.Healthchecks.PlatformStatus(ctx)
-		if err != nil {
-			clog.Fatalf("Error retrieving platform status", err)
-		}
-
-		if err := handler.Statuses.UpdateStatus(ctx, "platform", platformStatus.Status); err != nil {
-			clog.Fatalf("Error updating platform status", err)
-		}
-
-		time.Sleep(60 * time.Second)
-	}
-
 }
