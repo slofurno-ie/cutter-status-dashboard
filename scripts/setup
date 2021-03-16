@@ -1,14 +1,13 @@
-
 export DB_USERNAME=user
 export DB_PASSWORD=pass
 export DB_HOST=127.0.0.1
 export DB_NAME=db
 
-docker kill status-dashboard-db 2>/dev/null || true
+docker kill dashboard-psql 2>/dev/null || true
 
-cid=$(docker run --name status-dashboard-db -ePOSTGRES_PASSWORD=$DB_PASSWORD -ePOSTGRES_USER=$DB_USERNAME -ePOSTGRES_DB=$DB_NAME -p 5432 --rm -d postgres:11.8)
+cid=$(docker run --name dashboard-psql -ePOSTGRES_PASSWORD=$DB_PASSWORD -ePOSTGRES_USER=$DB_USERNAME -ePOSTGRES_DB=$DB_NAME -p 5432 --rm -d postgres:11.8)
 
-export DB_PORT=$(docker port status-dashboard-db | sed -e 's|5432/tcp -> 0.0.0.0:||')
+export DB_PORT=$(docker port dashboard-psql | sed -e 's|5432/tcp -> 0.0.0.0:||')
 
 while :; do
   sleep 1

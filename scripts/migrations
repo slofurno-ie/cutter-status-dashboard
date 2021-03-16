@@ -10,5 +10,5 @@ while :; do
 done
 
 CONN_STRING="postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable"
-
+echo $CONN_STRING
 migrate -source file:///migrations -database $CONN_STRING up

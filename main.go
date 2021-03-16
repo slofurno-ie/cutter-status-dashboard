@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"database/sql"
 	"fmt"
@@ -22,7 +21,7 @@ import (
 )
 
 type Config struct {
-	DbHost     string `envconfig:"DB_HOST" required:"true"`
+	DbHost     string `envconfig:"DB_HOSTNAME" required:"true"`
 	DbPort     string `envconfig:"DB_PORT" required:"true"`
 	DbUsername string `envconfig:"DB_USERNAME" required:"true"`
 	DbPassword string `envconfig:"DB_PASSWORD" required:"true"`
@@ -101,8 +100,8 @@ func main() {
 	}
 	s := server.New(scfg, handler)
 
-	ctx := context.Background()
-	go handler.AllChecks(ctx)
+	//ctx := context.Background()
+	//go handler.AllChecks(ctx)
 
 	clog.Infof("listening on %s", s.Addr)
 	fmt.Println(s.ListenAndServe())
