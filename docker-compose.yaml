@@ -7,7 +7,7 @@ services:
     links:
       - dashboard-psql
     ports:
-      - "127.0.0.1:6000:6000"
+      - "0.0.0.0:8080:8080"
     depends_on:
       - dashboard-psql
     volumes:

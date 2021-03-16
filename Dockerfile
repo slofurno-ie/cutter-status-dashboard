@@ -25,3 +25,5 @@ RUN echo "${SSH_KEY}" > /root/.ssh/id_rsa && \
     git config --global url."git@github.com:".insteadOf "https://github.com/" && \
     ssh-keyscan -t rsa github.com > /root/.ssh/known_hosts && \
     GOPRIVATE=github.com/IdeaEvolver/ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o cutter-status-dashboard
+
+EXPOSE 8080
