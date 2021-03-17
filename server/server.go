@@ -13,7 +13,7 @@ import (
 
 type StatusStore interface {
 	UpdateStatus(ctx context.Context, service, status string) error
-	GetAllStatuses(ctx context.Context) (*status.AllStatuses, error)
+	GetAllStatuses(ctx context.Context) ([]*status.AllStatuses, error)
 	GetStatus(ctx context.Context, service string) (*status.Status, error)
 }
 

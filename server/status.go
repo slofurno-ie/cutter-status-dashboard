@@ -2,13 +2,10 @@ package server
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/IdeaEvolver/cutter-pkg/clog"
-	"github.com/IdeaEvolver/cutter-pkg/cuterr"
 )
 
 type StatusRequest struct {
@@ -16,17 +13,9 @@ type StatusRequest struct {
 }
 
 func (h *Handler) GetStatus(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return nil, err
-	}
+	service := r.URL.Query().Get("service")
 
-	req := &StatusRequest{}
-	if err := json.Unmarshal(b, &req); err != nil {
-		return nil, cuterr.New(cuterr.BadRequest, "", err)
-	}
-
-	return h.Statuses.GetStatus(r.Context(), req.Service)
+	return h.Statuses.GetStatus(r.Context(), service)
 }
 
 func (h *Handler) GetAllStatuses(w http.ResponseWriter, r *http.Request) (interface{}, error) {

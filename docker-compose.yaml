@@ -15,7 +15,7 @@ services:
       - ./:/app
     environment:
       PORT: 8080
-      DB_HOSTNAME: "dashboard"
+      DB_HOSTNAME: "dashboard-psql"
       DB_USERNAME: "${DB_USERNAME}"
       DB_PASSWORD: "${DB_PASSWORD}"
       DB_NAME: "dashboard_db"

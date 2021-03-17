@@ -12,8 +12,9 @@ type StatusStore struct {
 }
 
 type AllStatuses struct {
-	Service string `json:"service"`
-	Status  string `json:"status"`
+	StatusId string
+	Service  string `json:"service"`
+	Status   string `json:"status"`
 }
 
 type Status struct {
@@ -40,21 +41,27 @@ func (s *StatusStore) UpdateStatus(ctx context.Context, service, status string) 
 	return nil
 }
 
-func (s *StatusStore) GetAllStatuses(ctx context.Context) (*AllStatuses, error) {
+func (s *StatusStore) GetAllStatuses(ctx context.Context) ([]*AllStatuses, error) {
 	var query = `SELECT * FROM statuses`
 
-	ret := &AllStatuses{}
-
-	err := s.db.QueryRowContext(ctx, query).
-		Scan(
-			&ret.Service,
-			&ret.Status,
-		)
-
+	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, cuterr.FromDatabaseError("GetAllStatuses", err)
 	}
+	defer rows.Close()
 
+	ret := []*AllStatuses{}
+	for rows.Next() {
+		r := &AllStatuses{}
+		if err := rows.Scan(
+			&r.StatusId,
+			&r.Service,
+			&r.Status,
+		); err != nil {
+			return nil, err
+		}
+		ret = append(ret, r)
+	}
 	return ret, nil
 }
 
