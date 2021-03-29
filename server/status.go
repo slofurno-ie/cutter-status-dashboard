@@ -34,6 +34,33 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error updating platform status", err)
 		}
 
+		fulfillmentStatus, err := h.Healthchecks.FulfillmentStatus(ctx)
+		if err != nil {
+			clog.Fatalf("Error retrieving fulfillment status", err)
+		}
+
+		if err := h.Statuses.UpdateStatus(ctx, "fulfillment", fulfillmentStatus.Status); err != nil {
+			clog.Fatalf("Error updating fulfillment status", err)
+		}
+
+		crmStatus, err := h.Healthchecks.CrmStatus(ctx)
+		if err != nil {
+			clog.Fatalf("Error retrieving crm status", err)
+		}
+
+		if err := h.Statuses.UpdateStatus(ctx, "crm", crmStatus.Status); err != nil {
+			clog.Fatalf("Error updating crm status", err)
+		}
+
+		studyStatus, err := h.Healthchecks.StudyStatus(ctx)
+		if err != nil {
+			clog.Fatalf("Error retrieving study status", err)
+		}
+
+		if err := h.Statuses.UpdateStatus(ctx, "study", studyStatus.Status); err != nil {
+			clog.Fatalf("Error updating study status", err)
+		}
+
 		time.Sleep(60 * time.Second)
 	}
 }

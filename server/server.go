@@ -2,12 +2,14 @@ package server
 
 import (
 	"context"
+	"net/http"
 
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/IdeaEvolver/cutter-pkg/service"
 	"github.com/IdeaEvolver/cutter-status-dashboard/healthchecks"
 	"github.com/IdeaEvolver/cutter-status-dashboard/status"
 	"github.com/go-chi/chi"
+	"github.com/rs/cors"
 	"go.opencensus.io/plugin/ochttp"
 )
 
@@ -24,6 +26,14 @@ type Handler struct {
 
 func New(cfg *service.Config, handler *Handler) *service.Server {
 	router := chi.NewRouter()
+
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodHead, http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodPost},
+		ExposedHeaders:   []string{"Authorization"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler)
 
 	router.Route("/api/v1", func(router chi.Router) {
 		router.Route("/", func(router chi.Router) {

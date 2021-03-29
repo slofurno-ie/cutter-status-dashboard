@@ -28,10 +28,10 @@ type Config struct {
 	DbName     string `envconfig:"DB_NAME" required:"true"`
 	DbOpts     string `envconfig:"DB_OPTS" required:"false"`
 
-	PlatformHealthcheck    string `envconfig:"PLATFORM_HEALTHCHECK" required:"false"`
-	FulfillmentHealthcheck string `envconfig:"FULFILLMENT_HEALTHCHECK" required:"false"`
-	CrmHealthcheck         string `envconfig:"CRM_HEALTHCHECK" required:"false"`
-	StudyHealthcheck       string `envconfig:"STUDY_HEALTHCHECK" required:"false"`
+	PlatformEndpoint       string `envconfig:"PLATFORM_ENDPOINT" required:"false"`
+	FulfillmentHealthcheck string `envconfig:"FULFILLMENT_ENDPOINT" required:"false"`
+	CrmHealthcheck         string `envconfig:"CRM_ENDPOINT" required:"false"`
+	StudyHealthcheck       string `envconfig:"STUDY_ENDPOINT" required:"false"`
 
 	PORT string `envconfig:"PORT"`
 }
@@ -88,7 +88,7 @@ func main() {
 
 	healthchecksClient := &healthchecks.Client{
 		Client:      client.New(internalClient),
-		Platform:    cfg.PlatformHealthcheck,
+		Platform:    cfg.PlatformEndpoint,
 		Fulfillment: cfg.FulfillmentHealthcheck,
 		Crm:         cfg.CrmHealthcheck,
 		Study:       cfg.StudyHealthcheck,
@@ -100,8 +100,8 @@ func main() {
 	}
 	s := server.New(scfg, handler)
 
-	//ctx := context.Background()
-	//go handler.AllChecks(ctx)
+	// ctx := context.Background()
+	// go handler.AllChecks(ctx)
 
 	clog.Infof("listening on %s", s.Addr)
 	fmt.Println(s.ListenAndServe())

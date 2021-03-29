@@ -1,4 +1,15 @@
 services:
+  cutter-status-dashboard-app:
+    build:
+      context: ../cutter-status-dashboard-app
+      target: development
+    ports:
+      - "0.0.0.0:3001:3001"
+    volumes:
+      - "../cutter-status-dashboard-app:/app"
+      - type: volume 
+        target: /app/node_modules
+        consistency: delegated       
   cutter-status-dashboard:
     build: 
       context: ./
@@ -22,6 +33,7 @@ services:
       DB_PORT: "5432"
       MIGRATE_LEVEL: "up"
       MIGRATIONS_FOLDER: "/app/migrations"
+      PLATFORM_ENDPOINT: 0.0.0.0:8081
   dashboard-psql:
     image: postgres
     ports:

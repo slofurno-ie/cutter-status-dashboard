@@ -28,11 +28,8 @@ func New(db *sql.DB) *StatusStore {
 }
 
 func (s *StatusStore) UpdateStatus(ctx context.Context, service, status string) error {
-	var query = `INSERT INTO statuses (service, status)
-	VALUES ($1, $2) 
-	ON CONFLICT DO UPDATE SET status = ($1)
-	WHERE service = $2
-	`
+	var query = `UPDATE statuses SET status = $2 WHERE service = $1`
+
 	_, err := s.db.ExecContext(ctx, query, service, status)
 	if err != nil {
 		return cuterr.FromDatabaseError("UpdateStatus", err)
