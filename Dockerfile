@@ -30,6 +30,8 @@
 
 FROM alpine:3.12.1
 
+COPY dist /dist 
+
 COPY cutter-status-dashboard /cutter-status-dashboard
 
 ENTRYPOINT ["/cutter-status-dashboard"]

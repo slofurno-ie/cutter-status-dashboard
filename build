@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd $(dirname $0)
+
+export GOPRIVATE=github.com/IdeaEvolver
+
+GOOS=linux CGO_ENABLED=0 CFLAGS=0 go build

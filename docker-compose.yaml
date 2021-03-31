@@ -1,15 +1,15 @@
 services:
-  cutter-status-dashboard-app:
-    build:
-      context: ../cutter-status-dashboard-app
-      target: development
-    ports:
-      - "0.0.0.0:3001:3001"
-    volumes:
-      - "../cutter-status-dashboard-app:/app"
-      - type: volume 
-        target: /app/node_modules
-        consistency: delegated       
+  # cutter-status-dashboard-app:
+  #   build:
+  #     context: ../cutter-status-dashboard-app
+  #     target: development
+  #   ports:
+  #     - "0.0.0.0:3000:3000"
+  #   volumes:
+  #     - "../cutter-status-dashboard-app:/app"
+  #     - type: volume 
+  #       target: /app/node_modules
+  #       consistency: delegated       
   cutter-status-dashboard:
     build: 
       context: ./

@@ -35,6 +35,8 @@ func New(cfg *service.Config, handler *Handler) *service.Server {
 		AllowCredentials: true,
 	}).Handler)
 
+	router.Handle("/*", http.FileServer(http.Dir("./dist")))
+
 	router.Route("/api/v1", func(router chi.Router) {
 		router.Route("/", func(router chi.Router) {
 			router.Method("GET", "/get-all-statuses", service.JsonHandler(handler.GetAllStatuses))
