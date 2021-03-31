@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export PROJECT_ID=${PROJECT_ID?PROJECT_ID not set}
+
+cd $(dirname $0)
+
+#apk add --no-cache gettext
+
+echo "Cutter-Dashboard-Service" \
+    | kubectl apply -f -
+
+export TAG=$(git rev-list -1 HEAD .)
+
+envsubst <./deploy.yaml | kubectl apply -f -

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -e
+
+mkdir -p /usr/local/bin
+
+install_tool() {
+  curl -sL https://storage.googleapis.com/go-build-tools/$1 -o /usr/local/bin/$1
+  chmod +x /usr/local/bin/$1
+}
+
+for x in migrate cloud_sql_proxy berglas; do
+  install_tool $x
+done
+
+ls /usr/local/bin
+
+cloud_sql_proxy -instances=cutter-214115:us-central1:$INSTANCE_NAME=tcp:5432 &
+
+proxy_pid=$!
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=dashboard_db
+DB_USERNAME=cutter
+
+for i in {00..20}; do
+  sleep 1
+  if nc -z $DB_HOST $DB_PORT; then
+    echo "postgres ready"
+    break
+  fi
+  echo "waiting for postgres"
+done
+
+export PGPASSWORD="$(berglas access sm://cutter-214115/cutter-status-dashboard-dev-db-pw)"
+
+CONN_STRING="postgres://$DB_USERNAME@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable"
+
+migrate -source file://$PWD/migrations -database $CONN_STRING up
+
+kill $proxy_pid
