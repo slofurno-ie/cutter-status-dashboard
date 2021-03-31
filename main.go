@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"database/sql"
 	"fmt"
@@ -100,8 +101,8 @@ func main() {
 	}
 	s := server.New(scfg, handler)
 
-	// ctx := context.Background()
-	// go handler.AllChecks(ctx)
+	ctx := context.Background()
+	go handler.AllChecks(ctx)
 
 	clog.Infof("listening on %s", s.Addr)
 	fmt.Println(s.ListenAndServe())
