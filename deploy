@@ -6,9 +6,6 @@ cd $(dirname $0)
 
 #apk add --no-cache gettext
 
-echo "Cutter-Dashboard-Service" \
-    | kubectl apply -f -
-
 export TAG=$(git rev-list -1 HEAD .)
 
 envsubst <./deploy.yaml | kubectl apply -f -

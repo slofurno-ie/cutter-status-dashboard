@@ -36,6 +36,10 @@ func New(cfg *service.Config, handler *Handler) *service.Server {
 	}).Handler)
 
 	router.Handle("/*", http.FileServer(http.Dir("./dist")))
+	router.HandleFunc("/healthcheck", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(200)
+		return
+	})
 
 	router.Route("/api/v1", func(router chi.Router) {
 		router.Route("/", func(router chi.Router) {
