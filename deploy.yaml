@@ -66,10 +66,16 @@ spec:
             value: "8080"
           - name: DB_HOSTNAME
             value: localhost
-          - name: DB_USERNAME
-            value: cutter
           - name: DB_PASSWORD
-            value: cutter
+            valueFrom:
+              secretKeyRef:
+                name: cutter-status-dashboard-secrets
+                key: PASSWORD
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: cutter-status-dashboard-secrets
+                key: USERNAME
           - name: DB_NAME 
             value: dashboard_db
           - name: DB_PORT
