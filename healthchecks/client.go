@@ -64,6 +64,18 @@ func (c *Client) PlatformStatus(ctx context.Context) (*ServiceResponse, error) {
 	return status, nil
 }
 
+func (c *Client) PlatformUIStatus(ctx context.Context) (*ServiceResponse, error) {
+	url := "https://dev.cutter.live/sign-in"
+	req, _ := client.NewRequestWithContext(ctx, "GET", url, nil)
+
+	status := &ServiceResponse{}
+	if err := c.do(ctx, req, &status); err != nil {
+		return nil, err
+	}
+
+	return status, nil
+}
+
 func (c *Client) FulfillmentStatus(ctx context.Context) (*ServiceResponse, error) {
 	url := fmt.Sprintf("%s/healthcheck", c.Fulfillment)
 	req, _ := client.NewRequestWithContext(ctx, "GET", url, nil)
@@ -90,6 +102,18 @@ func (c *Client) CrmStatus(ctx context.Context) (*ServiceResponse, error) {
 
 func (c *Client) StudyStatus(ctx context.Context) (*ServiceResponse, error) {
 	url := fmt.Sprintf("%s/healthcheck", c.Study)
+	req, _ := client.NewRequestWithContext(ctx, "GET", url, nil)
+
+	status := &ServiceResponse{}
+	if err := c.do(ctx, req, &status); err != nil {
+		return nil, err
+	}
+
+	return status, nil
+}
+
+func (c *Client) StudyUIStatus(ctx context.Context) (*ServiceResponse, error) {
+	url := "https://study.dev.cutter.live/"
 	req, _ := client.NewRequestWithContext(ctx, "GET", url, nil)
 
 	status := &ServiceResponse{}
