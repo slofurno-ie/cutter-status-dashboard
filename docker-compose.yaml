@@ -1,62 +1,19 @@
 services:
-  # cutter-status-dashboard-app:
-  #   build:
-  #     context: ../cutter-status-dashboard-app
-  #     target: development
-  #   ports:
-  #     - "0.0.0.0:3000:3000"
-  #   volumes:
-  #     - "../cutter-status-dashboard-app:/app"
-  #     - type: volume 
-  #       target: /app/node_modules
-  #       consistency: delegated       
   cutter-status-dashboard:
     build: 
       context: ./
       target: dev_environment
     entrypoint: CompileDaemon -log-prefix=false -build="env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o cutter-status-dashboard ." -command "./cutter-status-dashboard"
     links:
-      - dashboard-psql
+      - redis
     ports:
       - "0.0.0.0:8080:8080"
-    depends_on:
-      - dashboard-psql
     volumes:
       - ~/.ssh:/root/.ssh
       - ./:/app
     environment:
       PORT: 8080
-      DB_HOSTNAME: "dashboard-psql"
-      DB_USERNAME: "${DB_USERNAME}"
-      DB_PASSWORD: "${DB_PASSWORD}"
-      DB_NAME: "dashboard_db"
-      DB_PORT: "5432"
-      MIGRATE_LEVEL: "up"
-      MIGRATIONS_FOLDER: "/app/migrations"
+      REDIS_URL: redis:6379
       PLATFORM_ENDPOINT: 0.0.0.0:8081
-  dashboard-psql:
-    image: postgres
-    ports:
-      - "127.0.0.1:5434:5432"
-    environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_DB: dashboard_db
-    volumes:
-      - data:/var/lib/postgresql/dashboard_data
-  dashboard-migrations:
-    image: migrate/migrate
-    entrypoint: /scripts/migrations
-    depends_on:
-      - dashboard-psql
-    volumes:
-      - ./migrations:/migrations
-      - ./scripts:/scripts
-    environment:
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: 5432
-      DB_NAME: dashboard_db
-      DB_HOST: dashboard-psql
-volumes:
-  data:
+  redis:
+    image: redis:alpine

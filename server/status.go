@@ -12,25 +12,24 @@ type StatusRequest struct {
 	Service string `json:"service"`
 }
 
-func (h *Handler) GetStatus(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	service := r.URL.Query().Get("service")
+// func (h *Handler) GetStatus(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+// 	service := r.URL.Query().Get("service")
 
-	return h.Statuses.GetStatus(r.Context(), service)
-}
+// 	return h.Statuses.GetStatus(r.Context(), service)
+// }
 
 func (h *Handler) GetAllStatuses(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	return h.Statuses.GetAllStatuses(r.Context())
+	return h.Statuses.GetAllStatuses()
 }
 
 func (h *Handler) AllChecks(ctx context.Context) error {
 	for {
-
 		platformStatus, err := h.Healthchecks.PlatformStatus(ctx)
 		if err != nil {
 			clog.Fatalf("Error retrieving platform status", err)
 		}
 
-		if err := h.Statuses.UpdateStatus(ctx, "platform", platformStatus.Status); err != nil {
+		if err := h.Statuses.UpdateStatus("platform", platformStatus.Status); err != nil {
 			clog.Fatalf("Error updating platform status", err)
 		}
 
@@ -39,7 +38,7 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error retrieving fulfillment status", err)
 		}
 
-		if err := h.Statuses.UpdateStatus(ctx, "fulfillment", fulfillmentStatus.Status); err != nil {
+		if err := h.Statuses.UpdateStatus("fulfillment", fulfillmentStatus.Status); err != nil {
 			clog.Fatalf("Error updating fulfillment status", err)
 		}
 
@@ -48,7 +47,7 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error retrieving crm status", err)
 		}
 
-		if err := h.Statuses.UpdateStatus(ctx, "crm", crmStatus.Status); err != nil {
+		if err := h.Statuses.UpdateStatus("crm", crmStatus.Status); err != nil {
 			clog.Fatalf("Error updating crm status", err)
 		}
 
@@ -57,7 +56,7 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error retrieving study status", err)
 		}
 
-		if err := h.Statuses.UpdateStatus(ctx, "study", studyStatus.Status); err != nil {
+		if err := h.Statuses.UpdateStatus("study", studyStatus.Status); err != nil {
 			clog.Fatalf("Error updating study status", err)
 		}
 

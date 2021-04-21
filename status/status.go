@@ -1,81 +1,107 @@
 package status
 
 import (
-	"context"
-	"database/sql"
+	"time"
 
+	"github.com/IdeaEvolver/cutter-pkg/clog"
 	"github.com/IdeaEvolver/cutter-pkg/cuterr"
+	"github.com/garyburd/redigo/redis"
 )
 
 type StatusStore struct {
-	db *sql.DB
+	pool *redis.Pool
 }
 
 type AllStatuses struct {
-	StatusId string
-	Service  string `json:"service"`
-	Status   string `json:"status"`
+	Service string `json:"service"`
+	Status  string `json:"status"`
 }
 
 type Status struct {
 	Status string `json:"status"`
 }
 
-func New(db *sql.DB) *StatusStore {
+var services = []string{"platform", "platform-ui", "fulfillment", "crm", "study", "study-ui"}
+
+func InitRedis(url string) *redis.Pool {
+	// Establish a connection to the Redis server listening on port
+	// 6379 of the local machine. 6379 is the default port, so unless
+	// you've already changed the Redis configuration file this should
+	// work.
+	// conn, err := redis.Dial("tcp", cfg.REDIS_URL)
+	// if err != nil {
+	// 	clog.Fatalf("error dialing redis", err)
+	// }
+
+	pool := &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", url)
+		},
+	}
+
+	return pool
+}
+
+func New(pool *redis.Pool) *StatusStore {
 	return &StatusStore{
-		db: db,
+		pool: pool,
 	}
 }
 
-func (s *StatusStore) UpdateStatus(ctx context.Context, service, status string) error {
-	var query = `UPDATE statuses SET status = $2 WHERE service = $1`
+func (s *StatusStore) InitStatuses() {
+	// Use the connection pool's Get() method to fetch a single Redis
+	// connection from the pool.
+	conn := s.pool.Get()
 
-	_, err := s.db.ExecContext(ctx, query, service, status)
+	// Importantly, use defer and the connection's Close() method to
+	// ensure that the connection is always returned to the pool before
+	// FindAlbum() exits.
+	defer conn.Close()
+
+	// Send our command across the connection. The first parameter to
+	// Do() is always the name of the Redis command (in this example
+	// HMSET), optionally followed by any necessary arguments (in this
+	// example the key, followed by the various hash fields and values).
+
+	for _, s := range services {
+		_, err := conn.Do("HSET", "service:"+s, "status", "200")
+		if err != nil {
+			clog.Fatalf("error updating redis", err)
+		}
+	}
+}
+
+func (s *StatusStore) GetAllStatuses() ([]*AllStatuses, error) {
+	statusArr := []*AllStatuses{}
+
+	conn := s.pool.Get()
+	defer conn.Close()
+
+	for _, s := range services {
+		status := &AllStatuses{}
+		code, err := redis.String(conn.Do("HGET", "service:"+s, "status"))
+		if err != nil {
+			clog.Fatalf("error getting artist", err)
+			return nil, cuterr.New(cuterr.Internal, "could not get status", err)
+		}
+		status.Service = s
+		status.Status = code
+		statusArr = append(statusArr, status)
+	}
+
+	return statusArr, nil
+}
+
+func (s *StatusStore) UpdateStatus(service, status string) error {
+	conn := s.pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("HSET", "service:"+service, "status", status)
 	if err != nil {
-		return cuterr.FromDatabaseError("UpdateStatus", err)
+		return cuterr.New(cuterr.Internal, "could not update status", err)
 	}
 
 	return nil
-}
-
-func (s *StatusStore) GetAllStatuses(ctx context.Context) ([]*AllStatuses, error) {
-	var query = `SELECT * FROM statuses`
-
-	rows, err := s.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, cuterr.FromDatabaseError("GetAllStatuses", err)
-	}
-	defer rows.Close()
-
-	ret := []*AllStatuses{}
-	for rows.Next() {
-		r := &AllStatuses{}
-		if err := rows.Scan(
-			&r.StatusId,
-			&r.Service,
-			&r.Status,
-		); err != nil {
-			return nil, err
-		}
-		ret = append(ret, r)
-	}
-	return ret, nil
-}
-
-// might be useful to get individual service status
-
-func (s *StatusStore) GetStatus(ctx context.Context, service string) (*Status, error) {
-	var query = `SELECT status FROM statuses WHERE service = $1`
-
-	ret := &Status{}
-	err := s.db.QueryRowContext(ctx, query, service).
-		Scan(
-			&ret.Status,
-		)
-
-	if err != nil {
-		return nil, cuterr.FromDatabaseError("GetStatus", err)
-	}
-
-	return ret, nil
 }

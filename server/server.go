@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"net/http"
 
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
@@ -14,9 +13,9 @@ import (
 )
 
 type StatusStore interface {
-	UpdateStatus(ctx context.Context, service, status string) error
-	GetAllStatuses(ctx context.Context) ([]*status.AllStatuses, error)
-	GetStatus(ctx context.Context, service string) (*status.Status, error)
+	UpdateStatus(service, status string) error
+	GetAllStatuses() ([]*status.AllStatuses, error)
+	//GetStatus(ctx context.Context, service string) (*status.Status, error)
 }
 
 type Handler struct {
@@ -44,7 +43,7 @@ func New(cfg *service.Config, handler *Handler) *service.Server {
 	router.Route("/api/v1", func(router chi.Router) {
 		router.Route("/", func(router chi.Router) {
 			router.Method("GET", "/get-all-statuses", service.JsonHandler(handler.GetAllStatuses))
-			router.Method("GET", "/get-status", service.JsonHandler(handler.GetStatus))
+			//router.Method("GET", "/get-status", service.JsonHandler(handler.GetStatus))
 		})
 	})
 

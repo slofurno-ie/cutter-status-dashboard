@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -15,20 +14,13 @@ import (
 	"github.com/IdeaEvolver/cutter-status-dashboard/healthchecks"
 	"github.com/IdeaEvolver/cutter-status-dashboard/server"
 	"github.com/IdeaEvolver/cutter-status-dashboard/status"
+
 	"github.com/kelseyhightower/envconfig"
 	"go.opencensus.io/plugin/ochttp"
-
-	"contrib.go.opencensus.io/integrations/ocsql"
 )
 
 type Config struct {
-	DbHost     string `envconfig:"DB_HOSTNAME" required:"true"`
-	DbPort     string `envconfig:"DB_PORT" required:"true"`
-	DbUsername string `envconfig:"DB_USERNAME" required:"true"`
-	DbPassword string `envconfig:"DB_PASSWORD" required:"true"`
-	DbName     string `envconfig:"DB_NAME" required:"true"`
-	DbOpts     string `envconfig:"DB_OPTS" required:"false"`
-
+	REDIS_URL              string `envconfig:"REDIS_URL"`
 	PlatformEndpoint       string `envconfig:"PLATFORM_ENDPOINT" required:"false"`
 	FulfillmentHealthcheck string `envconfig:"FULFILLMENT_ENDPOINT" required:"false"`
 	CrmHealthcheck         string `envconfig:"CRM_ENDPOINT" required:"false"`
@@ -43,33 +35,8 @@ func main() {
 		clog.Fatalf("config: %s", err)
 	}
 
-	cs := fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-		cfg.DbHost,
-		cfg.DbPort,
-		cfg.DbUsername,
-		cfg.DbName,
-		cfg.DbPassword,
-	)
-
-	driverName, err := ocsql.Register(
-		"postgres",
-		ocsql.WithQuery(true),
-		ocsql.WithQueryParams(true),
-		ocsql.WithInstanceName("status-dashboard"),
-	)
-	if err != nil {
-		clog.Fatalf("unable to register our ocsql driver: %v\n", err)
-	}
-
-	db, err := sql.Open(driverName, cs)
-	if err != nil {
-		clog.Fatalf("failed to connect to db")
-	}
-
-	clog.Infof("connected to postgres: %s:%s", cfg.DbHost, cfg.DbPort)
-
-	statusStore := status.New(db)
+	pool := status.InitRedis(cfg.REDIS_URL)
+	statusStore := status.New(pool)
 
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -96,9 +63,10 @@ func main() {
 	}
 
 	handler := &server.Handler{
-		Healthchecks: healthchecksClient,
 		Statuses:     statusStore,
+		Healthchecks: healthchecksClient,
 	}
+
 	s := server.New(scfg, handler)
 
 	ctx := context.Background()
