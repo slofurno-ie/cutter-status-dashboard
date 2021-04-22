@@ -34,9 +34,13 @@ func main() {
 	if err := envconfig.Process("", cfg); err != nil {
 		clog.Fatalf("config: %s", err)
 	}
-
+	fmt.Println("REDIS URL : ", cfg.REDIS_URL)
 	pool := status.InitRedis(cfg.REDIS_URL)
 	statusStore := status.New(pool)
+
+	fmt.Println("ALL GOOD ", pool.Get().Flush())
+
+	statusStore.InitStatuses()
 
 	customTransport := http.DefaultTransport.(*http.Transport).Clone()
 	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}

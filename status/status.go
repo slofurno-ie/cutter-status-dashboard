@@ -1,6 +1,7 @@
 package status
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/IdeaEvolver/cutter-pkg/clog"
@@ -54,6 +55,7 @@ func (s *StatusStore) InitStatuses() {
 	// Use the connection pool's Get() method to fetch a single Redis
 	// connection from the pool.
 	conn := s.pool.Get()
+	fmt.Println("conn.    :   ", conn.Flush())
 
 	// Importantly, use defer and the connection's Close() method to
 	// ensure that the connection is always returned to the pool before
@@ -71,6 +73,8 @@ func (s *StatusStore) InitStatuses() {
 			clog.Fatalf("error updating redis", err)
 		}
 	}
+
+	fmt.Println("THIS WORKED")
 }
 
 func (s *StatusStore) GetAllStatuses() ([]*AllStatuses, error) {
