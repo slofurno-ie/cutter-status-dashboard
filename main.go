@@ -13,6 +13,7 @@ import (
 	"github.com/IdeaEvolver/cutter-pkg/clog"
 	"github.com/IdeaEvolver/cutter-pkg/service"
 	"github.com/IdeaEvolver/cutter-status-dashboard/healthchecks"
+	"github.com/IdeaEvolver/cutter-status-dashboard/metrics"
 	"github.com/IdeaEvolver/cutter-status-dashboard/server"
 	"github.com/IdeaEvolver/cutter-status-dashboard/status"
 	"github.com/kelseyhightower/envconfig"
@@ -33,6 +34,9 @@ type Config struct {
 	FulfillmentHealthcheck string `envconfig:"FULFILLMENT_ENDPOINT" required:"false"`
 	CrmHealthcheck         string `envconfig:"CRM_ENDPOINT" required:"false"`
 	StudyHealthcheck       string `envconfig:"STUDY_ENDPOINT" required:"false"`
+
+	GoogleProject string `envconfig:"GOOGLE_PROJECT" required:"true"`
+	ClusterName   string `envconfig:"CLUSTER_NAME" required:"true"`
 
 	PORT string `envconfig:"PORT"`
 }
@@ -95,9 +99,15 @@ func main() {
 		Study:       cfg.StudyHealthcheck,
 	}
 
+	metricsClient, err := metrics.New(cfg.GoogleProject, cfg.ClusterName)
+	if err != nil {
+		clog.Fatalf("unable to create metrics client: %v", err)
+	}
+
 	handler := &server.Handler{
 		Healthchecks: healthchecksClient,
 		Statuses:     statusStore,
+		Metrics:      metricsClient,
 	}
 	s := server.New(scfg, handler)
 

@@ -92,6 +92,8 @@ spec:
             value: "https://cutter-dev-crm-service-service"
           - name: STUDY_ENDPOINT
             value: "https://cutter-dev-study-service-service"
+          - name: CLUSTER_NAME
+            value: "cutter-dev-gke-cluster"
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.14
         resources:
