@@ -61,8 +61,13 @@ spec:
             value: /keys/cutter-214115-5bfe7b99a41d.json
           - name: PORT
             value: "8080"
+
           - name: DB_HOSTNAME
             value: localhost
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_NAME
+            value: dashboard_db
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -88,10 +93,6 @@ spec:
                 key: DB_PASSWORD
                 name: cutter-dev-platform-api-secrets
 
-          - name: DB_NAME
-            value: dashboard_db
-          - name: DB_PORT
-            value: "5432"
           - name: MIGRATE_LEVEL
             value: "up"
           - name: MIGRATIONS_FOLDER
