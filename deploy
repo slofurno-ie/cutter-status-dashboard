@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PROJECT_ID=${PROJECT_ID?PROJECT_ID not set}
+export PROJECT_ID=cutter-214115
 
 cd $(dirname $0)
 
