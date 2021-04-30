@@ -74,6 +74,15 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error updating infra status", err)
 		}
 
+		platformDb := "Ok"
+		if err := h.DatabaseHealth.Health(ctx); err != nil {
+			platformDb = "failed"
+			clog.Infof("platform healthcheck failed %v", err)
+		}
+		if err := h.Statuses.UpdateStatus(ctx, "database", platformDb); err != nil {
+			clog.Fatalf("Error updating database status", err)
+		}
+
 		time.Sleep(60 * time.Second)
 	}
 }
