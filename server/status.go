@@ -61,6 +61,19 @@ func (h *Handler) AllChecks(ctx context.Context) error {
 			clog.Fatalf("Error updating study status", err)
 		}
 
+		nodeMetrics, err := h.Metrics.GetNodeMetrics(ctx)
+		if err != nil {
+			clog.Fatalf("Error retrieving node metrics", err)
+		}
+
+		infra := "Ok"
+		if !nodeMetrics.Healthy() {
+			infra = "high utilization"
+		}
+		if err := h.Statuses.UpdateStatus(ctx, "infrastructure", infra); err != nil {
+			clog.Fatalf("Error updating infra status", err)
+		}
+
 		time.Sleep(60 * time.Second)
 	}
 }
